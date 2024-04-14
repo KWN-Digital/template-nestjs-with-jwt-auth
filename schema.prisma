@@ -1,0 +1,36 @@
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Session {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    access_token String   @unique @default(uuid()) @db.String
+    userId       String   @db.ObjectId
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    expires      DateTime
+    createdAt    DateTime @default(now())
+}
+
+model User {
+    id            String     @id @default(auto()) @map("_id") @db.ObjectId
+    firstname     String?    @db.String
+    lastname      String?    @db.String
+    email         String?    @unique @db.String
+    emailVerified DateTime?
+    image         String?
+    password      Password[]
+    sessions      Session[]
+    createdAt     DateTime   @default(now())
+    updatedAt     DateTime   @default(now()) @updatedAt
+}
+
+type Password {
+    hash      String
+    salt      String
+    createdAt DateTime @default(now())
+}
